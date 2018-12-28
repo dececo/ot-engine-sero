@@ -1,2 +1,2 @@
 # ot-engine-sero
-OpenTask Engine on SEROE
+OpenTask Engine on SERO
