@@ -4,6 +4,13 @@ import (
 	"net/http"
 	"gopkg.in/urfave/cli.v2"
 	"github.com/gin-gonic/gin"
+	"fmt"
+	"github.com/sero-cash/go-sero/seroclient"
+	"log"
+	"github.com/sero-cash/go-sero/common"
+	"github.com/sero-cash/go-sero"
+	"github.com/sero-cash/go-sero/core/types"
+	"context"
 )
 
 var (
@@ -50,5 +57,35 @@ func serve(ctx *cli.Context) error {
 }
 
 func listen(ctx *cli.Context) error {
+	stack := makeConfigNode(ctx)
+	fmt.Printf("server: %s, contract: %s\n", stack.Config.Server, stack.Config.Contract)
+
+	client, err := seroclient.Dial(stack.Config.Server)
+	if err != nil {
+		log.Fatal(err)
+	} else {
+		fmt.Println("we have a connection now.")
+	}
+
+	address := common.Base58ToAddress(stack.Config.Contract)
+	query := sero.FilterQuery{
+		Addresses: []common.Address{address},
+	}
+	logs := make(chan types.Log)
+	sub, err := client.SubscribeFilterLogs(context.Background(), query, logs)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for {
+		select {
+		case err := <-sub.Err():
+			fmt.Println(err)
+		case vLog := <-logs:
+			fmt.Println(vLog)
+		}
+	}
+
 	return nil
 }

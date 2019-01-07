@@ -1,0 +1,13 @@
+{
+  "database": {
+    "host": "localhost",
+    "port": "3306",
+    "user": "engine",
+    "password": "decopentask",
+    "database": "ot_local"
+  },
+  "node": {
+    "server": "ws://localhost:8546",
+    "contract": "yoNUfVkh7uBj41ArhXtmPMva2efU4SEATE3ZGCTVt5XD4zBMPJi78uqcFLin1doWxthovQqaWCXtwDDCuXXyGeL"
+  }
+}
