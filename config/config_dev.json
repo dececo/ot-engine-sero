@@ -8,6 +8,7 @@
   },
   "node": {
     "server": "ws://localhost:8546",
-    "contract": "yoNUfVkh7uBj41ArhXtmPMva2efU4SEATE3ZGCTVt5XD4zBMPJi78uqcFLin1doWxthovQqaWCXtwDDCuXXyGeL"
+    "contract": "yoNUfVkh7uBj41ArhXtmPMva2efU4SEATE3ZGCTVt5XD4zBMPJi78uqcFLin1doWxthovQqaWCXtwDDCuXXyGeL",
+    "to_block": 1440
   }
 }

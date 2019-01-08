@@ -9,8 +9,9 @@ import (
 	"log"
 	"github.com/sero-cash/go-sero/common"
 	"github.com/sero-cash/go-sero"
-	"github.com/sero-cash/go-sero/core/types"
 	"context"
+	"github.com/sero-cash/go-sero/core/types"
+	"github.com/dececo/ot-engine-sero/process"
 )
 
 var (
@@ -40,8 +41,41 @@ var (
 	}
 )
 
-func de(ctx *cli.Context) error {
-	return nil
+func de(ctx *cli.Context) (err error) {
+	stack := makeConfigNode(ctx)
+	fmt.Printf("server: %s, contract: %s\n", stack.Config.Server, stack.Config.Contract)
+
+	client, err := seroclient.Dial(stack.Config.Server)
+	if err != nil {
+		log.Fatal(err)
+	} else {
+		fmt.Println("we have a connection now.")
+	}
+
+	address := common.Base58ToAddress(stack.Config.Contract)
+	query := sero.FilterQuery{
+		Addresses: []common.Address{address},
+	}
+	if stack.Config.FromFlag {
+		query.FromBlock = stack.Config.FromBlock
+	}
+	if stack.Config.ToFlag {
+		query.ToBlock = stack.Config.ToBlock
+	}
+	logs, err := client.FilterLogs(context.Background(), query)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for i, vLog := range logs {
+		fmt.Printf("TxHash[%d]: %s\n", i, vLog.TxHash.Hex())
+		err := process.ParseOTLog(vLog)
+		if err != nil {
+			continue
+		}
+	}
+	return err
 }
 
 func serve(ctx *cli.Context) error {
@@ -56,7 +90,7 @@ func serve(ctx *cli.Context) error {
 	return nil
 }
 
-func listen(ctx *cli.Context) error {
+func listen(ctx *cli.Context) (err error) {
 	stack := makeConfigNode(ctx)
 	fmt.Printf("server: %s, contract: %s\n", stack.Config.Server, stack.Config.Contract)
 
@@ -83,9 +117,11 @@ func listen(ctx *cli.Context) error {
 		case err := <-sub.Err():
 			fmt.Println(err)
 		case vLog := <-logs:
-			fmt.Println(vLog)
+			err := process.ParseOTLog(vLog)
+			if err != nil {
+				continue
+			}
 		}
 	}
-
-	return nil
+	return
 }

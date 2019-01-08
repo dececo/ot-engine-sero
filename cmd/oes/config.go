@@ -9,6 +9,7 @@ import (
 	"log"
 	"github.com/dececo/ot-engine-sero/node"
 	"github.com/xyths/cyj/cmd/utils"
+	"math/big"
 )
 
 type Config struct {
@@ -65,9 +66,20 @@ func (c *Config) Load(file string) (err error) {
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	return json.NewDecoder(configFile).Decode(c)
+	err = json.NewDecoder(configFile).Decode(c)
+	if err != nil {
+		return err
+	}
+	if c.Node.FromBlock.Cmp(big.NewInt(0)) == 1 {
+		c.Node.FromFlag = true
+	}
+	if c.Node.ToBlock.Cmp(big.NewInt(0)) == 1 {
+		c.Node.ToFlag = true
+	}
+	return err
 }
 
 func DefaultConfig() (config Config) {
+	config.Node = node.DefaultConfig
 	return config
 }
